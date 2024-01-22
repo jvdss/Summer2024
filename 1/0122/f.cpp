@@ -22,63 +22,44 @@ const int INF = 0x3f3f3f3f;
 const int MAX  = 2e5+4;
 const int MOD  = 998244354; 
 
-int n;
-vector<int> g[MAX];
-int dist[MAX], par[MAX];
-void dfs(int u, int p = -1){
-    // cout << "-> " << u << endl;
+
+vi g[MAX];
+int cat[MAX];
+int m, ans;
+void dfs(int u, int p = -1,int at = 0, int mx = 0){
+    bool leaf = true;
     for(auto v : g[u]){
         if(v==p) continue;
-        dist[v] = dist[u] + 1;
-        par[v] = u;
-        dfs(v,u);
+        leaf = false;
+        if(cat[v]){
+            dfs(v,u,at+1, max(mx,at+1) );
+        }else{
+            dfs(v,u,0,mx);
+        }
+    }
+    if(leaf and mx <= m ){
+        ++ans;
     }
 }
-
-
 /* if interactive remove fastio endl */     
 /* stop freaking out pls*/ 
 void solve(){
-    cin >> n;
+    int n; cin >> n >> m;
+    ans = 0;
+    FOR(i,n) cin >> cat[i];
     FOR(i,n-1){
         int a,b; cin >> a >> b;
         --a; --b;
         g[a].pb(b);
         g[b].pb(a);
     }
-    
-    dfs(0);
-    set <pii> v;
-    int ans = 0;
-    FOR(i,n){
-        v.insert({dist[i],i});
-    }
-    
-    while(v.size()){
-        auto [d,it] = *v.rbegin();
-
-        if(d<=2) break;
-        int nxt= par[it];
-        
-        auto itt = v.find({dist[ nxt ],nxt});
-        if(itt != v.end())v.erase(itt);
-        
-        for(auto x : g[nxt]){
-            itt = v.find({dist[x], x});
-            if(itt != v.end())v.erase(itt);
-        }
-        ans++;
-        
-    }
-    
+    dfs(0,-1,cat[0],cat[0]);
     cout << ans << endl;
 }
-
 
 int32_t main(){
     ios::sync_with_stdio(false); cin.tie(0);
     int t = 1; 
-    // setIO("balancing"); 
     // cin >> t;
     while(t--){
         solve();

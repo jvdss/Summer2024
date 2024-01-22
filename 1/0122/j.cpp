@@ -21,64 +21,62 @@ const ll LINF = 0x3f3f3f3f3f3f3f3fll;
 const int INF = 0x3f3f3f3f;
 const int MAX  = 2e5+4;
 const int MOD  = 998244354; 
-
-int n;
-vector<int> g[MAX];
-int dist[MAX], par[MAX];
-void dfs(int u, int p = -1){
-    // cout << "-> " << u << endl;
+ 
+//  0 nao processei 
+//  1 to processando
+//  2 ja terminei de processar
+vi g[MAX];
+int par[MAX], cor[MAX], behind[MAX];
+int st,en;
+bool dfs(int u, int p = -1){
+    cor[u] = 1;
     for(auto v : g[u]){
         if(v==p) continue;
-        dist[v] = dist[u] + 1;
+        if(cor[v]==1 and behind[u]-behind[v]>=2){
+            st = v; en = u;
+            return true;
+        }
+        behind[v] = behind[u] + 1;
         par[v] = u;
-        dfs(v,u);
+        auto ret = dfs(v,u);
+        if(ret) return ret;
     }
+    return false;
 }
-
-
 /* if interactive remove fastio endl */     
 /* stop freaking out pls*/ 
 void solve(){
-    cin >> n;
-    FOR(i,n-1){
+    int n,m; cin >> n >> m;
+    FOR(i,m){
         int a,b; cin >> a >> b;
         --a; --b;
+        // cout << a << " " << b << endl;
         g[a].pb(b);
         g[b].pb(a);
     }
     
-    dfs(0);
-    set <pii> v;
-    int ans = 0;
-    FOR(i,n){
-        v.insert({dist[i],i});
-    }
-    
-    while(v.size()){
-        auto [d,it] = *v.rbegin();
-
-        if(d<=2) break;
-        int nxt= par[it];
-        
-        auto itt = v.find({dist[ nxt ],nxt});
-        if(itt != v.end())v.erase(itt);
-        
-        for(auto x : g[nxt]){
-            itt = v.find({dist[x], x});
-            if(itt != v.end())v.erase(itt);
+    FOR(i,n) if(cor[i]==0){
+        st = en = -1;
+        auto ok = dfs(i);
+        if(ok){
+            vi path; path.pb(st+1);
+            while(en!=st){
+                path.pb(en+1);
+                en = par[en];
+            }
+            path.pb(st+1);
+            cout << sz(path) << endl;
+            PR(path);
+            return;
         }
-        ans++;
-        
     }
+    cout << "IMPOSSIBLE\n";
     
-    cout << ans << endl;
 }
-
 
 int32_t main(){
     ios::sync_with_stdio(false); cin.tie(0);
     int t = 1; 
-    // setIO("balancing"); 
     // cin >> t;
     while(t--){
         solve();
